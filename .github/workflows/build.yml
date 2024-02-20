@@ -1,0 +1,40 @@
+name: Build and Deploy to GitHub Pages
+
+on:
+  push:
+    paths-ignore:
+      - '.devcontainer'
+      - '.github/dependabot.yml'
+      - '.gitattributes'
+      - '.gitignore'
+      - '.imgbotconfig'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Master
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: latest
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Astro
+        run: npm run build
+
+      - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/master'
+        uses: crazy-max/ghaction-github-pages@v4
+        with:
+          target_branch: gh-pages
+          build_dir: dist
+          fqdn: alonas.lv
+          jekyll: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
